@@ -1,37 +1,3 @@
-# from .sx126x import sx126x
-
-# # This Mac Address : e4:5f:01:da:ab:78
-# # Opposite Mac Address : e4:5f:01:da:aa:c8
-
-# # This LoRa's Address is 100
-# # Opposite LoRa's Address is 21
-
-# # To send an image
-# # This is a protocol of LoRa
-# class HSLR:
-    
-#     def __init__(self):
-                
-#         self.HEADER_SIZE = 12
-#         self.PACKET_SIZE = 240
-#         self.PAYLOAD_SIZE = 228
-        
-#         # size of Header's components
-#         self.DEST_EUI_SIZE = 6
-#         self.SEQUENCE_NUMBER_SIZE = 2
-#         self.FLAG_SIZE = 1
-#         self.PAYLOAD_SIZE_OF_SiZE = 1
-#         self.CHECKSUM_SIZE = 2
-        
-#         # environment setting
-        
-        
-#     def send(self):
-        
-        
-#     def receive(self):
-        
-        
 import RPi.GPIO as GPIO
 import serial
 import time
@@ -127,8 +93,12 @@ class HSLR:
         self.FIN = 5
         self.RBVACK = 6
         
+        self.FLAG = 0
+        
         # To checkt BVACK packet's index
         self.BVACK_INDEX = []
+        self.BVACK_SIZE = 5
+        self.BVACK_ELEMENT_SIZE = 2
         
         # HEADER INDEX
         self.DEST_EUI_INDEX = 0
@@ -136,6 +106,15 @@ class HSLR:
         self.FLAG_INDEX = 8
         self.PAYLOAD_SIZE_INDEX = 9
         self.CHECKSUM_INDEX = 10
+        
+        # About Image
+        self.imageSize = 0
+        self.imageWidth = 0
+        self.imageHeight = 0
+        
+        self.IMAGE_SIZE_INDEX_END = 4
+        self.IMAGE_WIDTH_INDEX_END = 6
+        self.IMAGE_HEIGHT_INDEX_END = 8
         
         # Initial the GPIO for M0 and M1 Pin
         GPIO.setmode(GPIO.BCM)
@@ -515,6 +494,11 @@ class HSLR:
     # check an integrity and remove header of the packet
     def parse(self, packet):
         
+        # check CheckSum
+        result = self.check(packet)
+        if result == False:
+            return []
+        
         # check DEST EUI
         destEUI = packet[self.DEST_EUI_INDEX:self.SEQUENCE_NUMBER_INDEX]
         if destEUI != self.DEST_MAC:
@@ -522,23 +506,59 @@ class HSLR:
             return []
         
         # check sequence number
-        # 시퀀스 넘버를 BVACK 패킷에 넣는다.
-        
-        # check flag
-        # 플래그 값에 따른 처리
+        # put sequence number into the BVACK_INDEX
+        sequenceNumber = int.from_bytes(packet[self.SEQUENCE_NUMBER_INDEX:self.FLAG_INDEX], 'big')
+        self.BVACK_INDEX.append(sequenceNumber)
         
         # check payload size
         payloadSize = int.from_bytes(packet[self.PAYLOAD_SIZE_INDEX:self.CHECKSUM_INDEX], 'big')
         if len(packet[self.HEADER_SIZE:]) != payloadSize:
             print("length is incorrect")
             return []
-                    
-        # check CheckSum
-        result = self.check(packet)
-        if result == False:
-            return []
         
         payload = packet[self.HEADER_SIZE:]
         
+        # check flag
+        flag = int.from_bytes(packet[self.FLAG_INDEX:self.PAYLOAD_SIZE_INDEX], 'big')
+        
+        if flag == self.DATA:
+            self.FLAG = self.DATA
+        elif flag == self.BVACK:
+            self.FALG = self.BVACK
+            self.BVACK_INDEX = []
+            
+            # check BVACK packet (0 is ignored)
+            for i in range(0, self.BVACK_SIZE, self.BVACK_ELEMENT_SIZE):
+                element = int.from_bytes(payload[i:i+self.BVACK_ELEMENT_SIZE], 'big')
+                self.BVACK_INDEX.append(element)
+            
+            
+            # snedData
+        elif flag == self.SYN:
+            self.FALG = self.SYN
+            # save the image size and width, height
+            self.imageSize = payload[:self.IMAGE_SIZE_INDEX_END]
+            self.imageWidth = payload[self.IMAGE_SIZE_INDEX_END:self.IMAGE_WIDTH_INDEX_END]
+            self.imageHeight = payload[self.IMAGE_WIDTH_INDEX_END:self.IMAGE_HEIGHT_INDEX_END]
+        elif flag == self.ACK:
+            if self.FLAG == self.SYN:
+                # send Data
+            elif self.FLAG = self.FIN:
+                # send
+            
+            self.FLAG = self.ACK
+            
+        elif flag == self.FIN:
+            self.FALG = self.FIN
+            
+        elif flag == self.RBVACK:
+            self.FLAG = self.RBVACK
+
+        else:
+            self.FLAG = 0
+            print("flag is incorrect")
+            return []
+        
         return payload
 
+        

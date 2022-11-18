@@ -236,8 +236,8 @@ class sx126x:
 
     def firstPacket(self):
         packet = bytearray(240)
-        DEST_EUI = 
-        SRC_EUI = 
+
+        
         
 
     def send(self,data):

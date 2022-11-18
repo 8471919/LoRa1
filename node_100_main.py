@@ -35,11 +35,9 @@ class LoRa:
         old_settings, node, seconds, send_to_who
     """
     
-    def __init__(self, cam):
+    def __init__(self):
         
         print("property setting...")
-
-        self.cam = cam
         
         #The following should be 238 bytes in total.
         #packet_size, timebytes
@@ -114,7 +112,7 @@ class LoRa:
     def sendCoordinate(self):
         
         # get coordinate from Cam        
-        coordinate = self.cam.captureForCoordinate()
+        # coordinate = self.cam.captureForCoordinate()
         print(coordinate)
         temp = {}
         
@@ -147,7 +145,7 @@ class LoRa:
         # image = cv2.imread('./lora/test.jpg')
         # imageBytes = cv2.imencode('.jpg', image)[1].tobytes()
  
-        imageBytes = self.cam.firstCapture()
+        # imageBytes = self.cam.firstCapture()
     
         print("imageBytes")
         print(imageBytes)
