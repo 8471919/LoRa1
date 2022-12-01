@@ -40,9 +40,6 @@ class LoRa:
         print("property setting...")
         
         #The following should be 238 bytes in total.
-        #packet_size, timebytes
-        self.packet_size = 234
-        self.timebytes = 4
         
         self.serial_num = "/dev/ttyS0"
         self.freq = 915
@@ -55,7 +52,6 @@ class LoRa:
         # it will send every seconds(default is 10) seconds 
         # send_to_who is the address of other node ( defult is 21)
         self.send_to_who = 21
-        self.seconds = 5
 
         print("node setting...")
         self.node = sx126x.sx126x(serial_num = self.serial_num, freq=self.freq, addr=self.addr, power=self.power, rssi=self.rssi)
@@ -144,7 +140,7 @@ class LoRa:
         # for test
         # image = cv2.imread('./lora/test.jpg')
         # imageBytes = cv2.imencode('.jpg', image)[1].tobytes()
- 
+
         # imageBytes = self.cam.firstCapture()
     
         print("imageBytes")
@@ -154,17 +150,17 @@ class LoRa:
     
         self.node.addr_temp = self.node.addr
         self.node.set(self.node.freq, self.send_to_who, self.node.power, self.node.rssi)
-       
+
         # send the imageBytes
         self.node.transmitImageBytes(imageBytes)
         
         self.node.set(self.node.freq, self.node.addr_temp, self.node.power, self.node.rssi)
 
     def sendMPLR(self):
- 
+
         self.node.addr_temp = self.node.addr
         self.node.set(self.node.freq, self.send_to_who, self.node.power, self.node.rssi)
-       
+
         # send the imageBytes
         self.node.transmitMPLR()
         
