@@ -97,7 +97,7 @@ class HSLR:
         self.FLAG = 0
         
         # To checkt BVACK packet's index
-        self.BVACK_INDEX = bytearray(10)
+        self.BVACK_INDEX = bytearray(0)
         self.BVACK_LENGTH = 5
         self.BVACK_ELEMENT_SIZE = 2
         
@@ -327,6 +327,7 @@ class HSLR:
         self.transmitSyn(imageSize=len(imageBytes), width=640, height=480)
         
         print("----- SYN packet sent -----")
+        print()
         
         bvackArray = []
         # send image bytes (DATA Packets)
@@ -378,7 +379,7 @@ class HSLR:
                 
                 # get bvack list of byte type
                 bvackList = self.parse(packet=packet)
-                
+                print(self.FLAG)
                 if self.FLAG == self.BVACK:
                     print("Get BVACK packet")
                 else:
@@ -573,9 +574,7 @@ class HSLR:
             return []
         
         # check sequence number
-        # put sequence number into the BVACK_INDEX
         sequenceNumber = int.from_bytes(packet[self.SEQUENCE_NUMBER_INDEX:self.FLAG_INDEX], 'big')
-        self.BVACK_INDEX.append(sequenceNumber)
         
         # check payload size
         payloadSize = int.from_bytes(packet[self.PAYLOAD_SIZE_INDEX:self.CHECKSUM_INDEX], 'big')
@@ -589,6 +588,11 @@ class HSLR:
         flag = int.from_bytes(packet[self.FLAG_INDEX:self.PAYLOAD_SIZE_INDEX], 'big')
         
         self.FLAG = flag
+        
+        # if flag is DATA, put sequence number into the BVACK_INDEX
+        if flag == self.DATA:
+            self.BVACK_INDEX += packet[self.SEQUENCE_NUMBER_INDEX:self.FLAG_INDEX]
+        
         
         # if flag == self.DATA:
         #     self.FLAG = self.DATA
@@ -671,6 +675,7 @@ class HSLR:
                 # if get SYN-ACK Packet
                 if self.FLAG == self.SYNACK:
                     print("Get SYN-ACK Packet")
+                    print()
                     break
                 else:
                     print("something wrong")
