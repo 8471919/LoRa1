@@ -494,7 +494,7 @@ class HSLR:
         
         print("----- here is addHeader -----")
         print("|         dest eui         | sequence Num |  FLAG  | Paylaod size |")
-        print("| "+ str(self.DEST_MAC) +" |      "+str(int.from_bytes(sequenceNum, 'big'))+"       |"+" {:<7}".format(flagName)+"|      "+str(len(payload))+"       |")
+        print("| "+ str(self.DEST_MAC) +" |      "+str(int.from_bytes(sequenceNum, 'big'))+"       |"+" {:<7}".format(flagName)+"|      "+str(len(payload))+"      |")
         
         return header + payload
     
@@ -707,7 +707,7 @@ class HSLR:
         # time.sleep(0.1)
         
         # add Header with ACK FLAG
-        packet = self.addHeader(sequenceNumber=0, flag=self.ACK)
+        packet = self.addHeader(sequenceNum=0, flag=self.ACK)
     
         # send packet
         self.ser.write(packet)
@@ -720,7 +720,7 @@ class HSLR:
         # time.sleep(0.1)
         
         # add Header with ACK FLAG
-        packet = self.addHeader(sequenceNumber=0, flag=self.BVACK, payload=payload)
+        packet = self.addHeader(sequenceNum=0, flag=self.BVACK, payload=payload)
     
         # sequenceNumber + 1
         # self.sequenceNumber+=1
@@ -736,7 +736,7 @@ class HSLR:
         # time.sleep(0.1)
         
         # add Header with ACK FLAG
-        packet = self.addHeader(sequenceNumber=0, flag=self.FIN)
+        packet = self.addHeader(sequenceNum=0, flag=self.FIN)
         
         # send packet
         self.ser.write(packet)
