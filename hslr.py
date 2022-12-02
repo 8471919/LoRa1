@@ -328,6 +328,7 @@ class HSLR:
         bvackArray = []
         # send image bytes (DATA Packets)
         while self.FLAG != self.FIN:
+            # think of the best small value to use
             time.sleep(0.5)
             
             i = 0
@@ -345,9 +346,10 @@ class HSLR:
                 i+=1
 
             # after sending 5 DATA packet, wait BVACK packet.
-            payload = self.receiveBvackPackcet()
+            payload = self.receiveBvackPacket()
             
             # when error occrued
+            # NOTE : 고쳐야됨. 마지막 BVACK 패킷은 길이가 10이 안될수도...
             if len(payload) != 10:
                 print("BVACK packet's length is too short")
                 exit()
@@ -364,7 +366,7 @@ class HSLR:
             if maxSequenceNumber <= self.sequenceNumber:
                 self.transmitFin()
             
-    def receiveBvackPackcet(self):
+    def receiveBvackPacket(self):
         while True:
             if self.ser.inWaiting() > 0:
                 time.sleep(0.5)
@@ -384,7 +386,25 @@ class HSLR:
 
                 return bvackList
 
-    def receiveImage(self):
+    def receiveDataPacket(self):
+        imageBytes = bytearray()
+        
+        while True:
+            if self.ser.inWaiting() > 0:
+                time.sleep(0.5)
+                r_buff = self.ser.read(self.ser.inWaiting())
+                packet = r_buff[:-1]
+                
+                # check the packet and get payload
+                payload = self.parse(packet=packet)
+                
+                # if BVACK_INDEX is full, send BVACK Packet
+                if len(self.BVACK_INDEX) >= 10:
+                    self.transmitBvack(self.BVACK_INDEX)
+                    
+                
+        
+        
         if self.ser.inWaiting() > 0:
             time.sleep(0.5)
             r_buff = self.ser.read(self.ser.inWaiting())
@@ -629,7 +649,7 @@ class HSLR:
         payload = imageSize + width + height
         
         # add Header with SYN FLAG
-        packet = self.addHeader(sequenceNumber=self.sequenceNumber, flag=self.SYN, payload=payload)
+        packet = self.addHeader(sequenceNumber=0, flag=self.SYN, payload=payload)
         
         # sequenceNumber + 1
         self.sequenceNumber+=1
@@ -655,6 +675,16 @@ class HSLR:
                 else:
                     print("something wrong")
                     exit()
+                    
+    def transmitSYNACK(self):
+        
+        # add Header with SYNACK FLAG
+        packet = self.addHeader(sequenceNum=0, flag=self.SYNACK)
+        
+        # send packet
+        self.ser.write(packet)
+        
+        time.sleep(0.5)
         
     # for sending and resending DATA packet
     def transmitData(self, payload, sequenceNum):
@@ -677,11 +707,8 @@ class HSLR:
         # time.sleep(0.1)
         
         # add Header with ACK FLAG
-        packet = self.addHeader(sequenceNumber=self.sequenceNumber, flag=self.ACK)
+        packet = self.addHeader(sequenceNumber=0, flag=self.ACK)
     
-        # sequenceNumber + 1
-        self.sequenceNumber+=1
-        
         # send packet
         self.ser.write(packet)
         
@@ -709,10 +736,7 @@ class HSLR:
         # time.sleep(0.1)
         
         # add Header with ACK FLAG
-        packet = self.addHeader(sequenceNumber=self.sequenceNumber, flag=self.FIN)
-    
-        # sequenceNumber + 1
-        self.sequenceNumber+=1
+        packet = self.addHeader(sequenceNumber=0, flag=self.FIN)
         
         # send packet
         self.ser.write(packet)
