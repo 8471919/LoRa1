@@ -16,10 +16,12 @@ class LoRa:
         
     def sendImage(self):
         imageBytes = bytearray()
-        imageBytes += b'\x01\x02\x03\x04\x05'
         
+        for i in range(0, 228):
+            imageBytes += b'\x01'
+                
         print(imageBytes)
-        print(len(imageBytes))
+        print("Image size : " + str(len(imageBytes)))
         
         # node setting
         self.node.addr_temp = self.node.ADDRESS

@@ -321,9 +321,12 @@ class HSLR:
         time.sleep(0.1)
         
         maxSequenceNumber = int((len(imageBytes) - 1) / self.PAYLOAD_SIZE) + 1
+        print("----- max sequence number : " + str(maxSequenceNumber))
 
         # send a syn packet with imageSize, width and height
-        self.transmitSyn(imageSize=5000, width=640, height=480)
+        self.transmitSyn(imageSize=len(imageBytes), width=640, height=480)
+        
+        print("----- SYN packet sent -----")
         
         bvackArray = []
         # send image bytes (DATA Packets)
@@ -473,34 +476,25 @@ class HSLR:
         # set checksum into header
         header[self.CHECKSUM_INDEX:self.HEADER_SIZE] = checkSum
         
-        # print("header 0~9 : " + str(header[0:10]))
-        # print(len(payload))
-        # # calculate checksum
-        # # add the each 16bit of the packet
-        # sum = 0
-        # for i in range(0, 10, 2):
-        #     int_val = int.from_bytes(header[i:i+2], 'big')
-        #     sum = bin(sum + int_val)[2:]
-        #     if len(sum) > 16:
-        #         sum = int(sum[1:], 2) + 1
-        #     else:
-        #         sum = int(sum, 2)
         
-        # for i in range(0, len(payload), 2):
-        #     int_val = int.from_bytes(payload[i:i+2], 'big')
-        #     sum = bin(sum + int_val)[2:]
-        #     if len(sum) > 16:
-        #         sum = int(sum[1:], 2) + 1
-        #     else:
-        #         sum = int(sum, 2)
+        t = int.from_bytes(flag, 'big')
+        flagName = "TEMP"
+        if t == 1:
+            flagName = "SYN"
+        elif t == 2:
+            flagName = "SYNACK"
+        elif t == 3:
+            flagName = "ACK"
+        elif t == 4:
+            flagName = "DATA"
+        elif t == 5:
+            flagName = "BVACK"
+        elif t == 6:
+            flagName = "FIN"
         
-        # print("sum : " + str(sum))
-        
-        # checkSum = sum.to_bytes(2, 'big')
-        
-        # print("checksum : " + str(checkSum))
-                
-        # header[10:12] = checkSum
+        print("----- here is addHeader -----")
+        print("|         dest eui         | sequence Num |  FLAG  | Paylaod size |")
+        print("| "+ str(self.DEST_MAC) +" |      "+str(int.from_bytes(sequenceNum, 'big'))+"       |"+" {:<7}".format(flagName)+"|      "+str(len(payload))+"       |")
         
         return header + payload
     
@@ -647,6 +641,12 @@ class HSLR:
         height = height.to_bytes(2, 'big')
         
         payload = imageSize + width + height
+        
+        print("----- here is in transmitSyn -----")
+        print("size : " + str(imageSize))
+        print("width : " + str(width))
+        print("height : " + str(height))
+        print("payload : " + str(bytes(payload)))
         
         # add Header with SYN FLAG
         packet = self.addHeader(sequenceNum=0, flag=self.SYN, payload=payload)

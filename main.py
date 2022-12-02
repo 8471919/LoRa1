@@ -3,6 +3,7 @@ from lora import LoRa
 
 def main():
     lora = LoRa()
+    print("----- LoRa Open -----")
     lora.sendImage()
 
     # lora = HSLR(serial_num='/dev/ttyS0', freq=915, addr=21, power=22, rssi=True)
