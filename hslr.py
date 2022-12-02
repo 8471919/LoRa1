@@ -83,8 +83,8 @@ class HSLR:
         self.SERIAL_NUMBER = serial_num
     
         # MAC Address
-        self.SOURCE_MAC = b'\xe4_\x01\xda\xabx'  # e4:5f:01:da:aa:c8
-        self.DEST_MAC = b'\xe4_\x01\xda\xaa\xc8'   # e4:5f:01:da:ab:78
+        self.SOURCE_MAC = b'\xe4_\x01\xda\xabx'  # e4:5f:01:da:ab:78
+        self.DEST_MAC = b'\xe4_\x01\xda\xaa\xc8'   # e4:5f:01:da:aa:c8
         
         # FLAGS
         self.SYN = 1
