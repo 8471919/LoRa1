@@ -118,6 +118,7 @@ class HSLR:
         
         # To manage Sequence fluently
         self.sequenceNumber = 0
+        self.maxSequenceNumber = 0
         
         # Initial the GPIO for M0 and M1 Pin
         GPIO.setmode(GPIO.BCM)
@@ -344,8 +345,8 @@ class HSLR:
             
                 i+=1
             
-            # send packets remaining out of 5
-            while i < 5:
+            # send packets remaining out of 5, if remaining payload data is not 0.
+            while (i < 5) and (len(imageBytes[(self.sequenceNumber-1)*self.PAYLOAD_SIZE:self.sequenceNumber*self.PACKET_SIZE]) != 0):
                 self.transmitData(payload=imageBytes[(self.sequenceNumber-1)*self.PAYLOAD_SIZE:self.sequenceNumber*self.PACKET_SIZE], sequenceNum=self.sequenceNumber)
                 i+=1
 
@@ -369,6 +370,7 @@ class HSLR:
             # after sending all DATA packet, send FIN packet.
             if maxSequenceNumber <= self.sequenceNumber:
                 self.transmitFin()
+                print("FIN packet sent and sequence number is " + str(self.sequenceNumber))
             
     def receiveBvackPacket(self):
         while True:
