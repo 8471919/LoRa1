@@ -347,7 +347,7 @@ class HSLR:
             
             # send packets remaining out of 5, if remaining payload data is not 0.
             while (i < 5) and (len(imageBytes[(self.sequenceNumber-1)*self.PAYLOAD_SIZE:self.sequenceNumber*self.PACKET_SIZE]) != 0):
-                self.transmitData(payload=imageBytes[(self.sequenceNumber-1)*self.PAYLOAD_SIZE:self.sequenceNumber*self.self.PAYLOAD_SIZE], sequenceNum=self.sequenceNumber)
+                self.transmitData(payload=imageBytes[(self.sequenceNumber-1)*self.PAYLOAD_SIZE:self.sequenceNumber*self.PAYLOAD_SIZE], sequenceNum=self.sequenceNumber)
                 i+=1
 
             # after sending 5 DATA packet, wait BVACK packet.
