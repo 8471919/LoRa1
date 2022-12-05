@@ -347,7 +347,7 @@ class HSLR:
             
             # send packets remaining out of 5, if remaining payload data is not 0.
             while (i < 5) and (len(imageBytes[(self.sequenceNumber-1)*self.PAYLOAD_SIZE:self.sequenceNumber*self.PACKET_SIZE]) != 0):
-                self.transmitData(payload=imageBytes[(self.sequenceNumber-1)*self.PAYLOAD_SIZE:self.sequenceNumber*self.PACKET_SIZE], sequenceNum=self.sequenceNumber)
+                self.transmitData(payload=imageBytes[(self.sequenceNumber-1)*self.PAYLOAD_SIZE:self.sequenceNumber*self.self.PAYLOAD_SIZE], sequenceNum=self.sequenceNumber)
                 i+=1
 
             # after sending 5 DATA packet, wait BVACK packet.
@@ -355,9 +355,9 @@ class HSLR:
             
             # when error occrued
             # NOTE : 고쳐야됨. 마지막 BVACK 패킷은 길이가 10이 안될수도...
-            if len(payload) != 10:
-                print("BVACK packet's length is too short")
-                exit()
+            # if len(payload) != 10:
+            #     print("BVACK packet's length is too short")
+            #     exit()
             
             bvackArray = []
             # check lost packets in BVACK packet
@@ -458,6 +458,7 @@ class HSLR:
     # add header to payload    
     def addHeader(self, sequenceNum, flag, payload=bytearray(0)):
         if len(payload) > self.PAYLOAD_SIZE:
+            print("payload size : " + str(len(payload)))
             print("payload size is over")
             exit()
         

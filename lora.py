@@ -17,7 +17,7 @@ class LoRa:
     def sendImage(self):
         imageBytes = bytearray()
         
-        for i in range(0, 228):
+        for i in range(0, 2300):
             imageBytes += b'\x01'
                 
         print(imageBytes)
