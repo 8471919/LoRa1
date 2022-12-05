@@ -346,7 +346,8 @@ class HSLR:
                 i+=1
             
             # send packets remaining out of 5, if remaining payload data is not 0.
-            while (i < 5) and (len(imageBytes[(self.sequenceNumber-1)*self.PAYLOAD_SIZE:self.sequenceNumber*self.PACKET_SIZE]) != 0):
+            while (i < 5) and (len(imageBytes[(self.sequenceNumber-1)*self.PAYLOAD_SIZE:self.sequenceNumber*self.PAYLOAD_SIZE]) != 0):
+                print("sequence Num is : " + str(self.sequenceNumber))
                 self.transmitData(payload=imageBytes[(self.sequenceNumber-1)*self.PAYLOAD_SIZE:self.sequenceNumber*self.PAYLOAD_SIZE], sequenceNum=self.sequenceNumber)
                 i+=1
 
@@ -369,9 +370,10 @@ class HSLR:
                     bvackArray.append(index)
             
             # after sending all DATA packet, send FIN packet.
-            if maxSequenceNumber <= self.sequenceNumber:
-                self.transmitFin()
-                print("FIN packet sent and sequence number is " + str(self.sequenceNumber))
+            if maxSequenceNumber < self.sequenceNumber:
+                self.fourHandShake()
+                
+                
             
     def receiveBvackPacket(self):
         while True:
@@ -453,7 +455,33 @@ class HSLR:
                     print(str(len(imageBytes)) + " / " + str(imageLength))
             
             return imageBytes
+    
+    def fourHandShake(self):
+        self.transmitFin()
+        print("FIN packet sent and sequence number is " + str(self.sequenceNumber-1))
         
+        # wait ACK and FIN packets
+        while True:
+            if self.ser.inWaiting() > 0:
+                time.sleep(0.5)
+                r_buff = self.ser.read(self.ser.inWaiting())
+                packet = r_buff[:-1]
+                
+                previousFlag = self.FLAG
+                
+                # check the packet and get payload
+                payload = self.parse(packet=packet)
+                
+                if self.FLAG == self.ACK:
+                    print("get ACK packet")
+                elif self.FLAG == self.FIN and self.ACK == previousFlag:
+                    print("get FIN packet")
+                    break
+                else:
+                    print("get strange packet. exit.")
+                    exit()
+                
+        self.transmitAck()
     
     # add header to payload    
     def addHeader(self, sequenceNum, flag, payload=bytearray(0)):
