@@ -339,7 +339,7 @@ class HSLR:
             i = 0
             # re-send lost packet first
             while len(bvackArray) != 0:
-                sequenceNumber = bvackArray.pop()
+                sequenceNumber = bvackArray.pop(0)
                 
                 self.transmitData(payload=imageBytes[(sequenceNumber-1)*self.PAYLOAD_SIZE:sequenceNumber*self.PAYLOAD_SIZE], sequenceNum=sequenceNumber)
             
@@ -352,6 +352,7 @@ class HSLR:
 
             # after sending 5 DATA packet, wait BVACK packet.
             payload = self.receiveBvackPacket()
+            print("BVACK list : " + str(payload))
             
             # when error occrued
             # NOTE : 고쳐야됨. 마지막 BVACK 패킷은 길이가 10이 안될수도...
@@ -381,7 +382,6 @@ class HSLR:
                 
                 # get bvack list of byte type
                 bvackList = self.parse(packet=packet)
-                print(self.FLAG)
                 if self.FLAG == self.BVACK:
                     print("Get BVACK packet")
                 else:
